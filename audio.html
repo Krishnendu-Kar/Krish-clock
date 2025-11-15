@@ -1,0 +1,11 @@
+<script>
+const audio = new Audio('timer.mp3');
+audio.muted = false; // Audio starts muted
+audio.play();
+
+// You would then provide a way for the user to unmute it, e.g.:
+ <button id="unmuteButton">Unmute Audio</button>
+ document.getElementById('unmuteButton').addEventListener('click', () => {
+     audio.muted = false;
+ });
+</script>

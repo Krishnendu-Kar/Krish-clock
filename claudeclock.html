@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <link rel="stylesheet" href="claudeclock.css"/>
+ 
+    <title>Claude Gpt mix clock</title>
+    
+</head>
+<body>
+    <button class="toggle-theme" id="themeToggle">🎑</button>
+    
+    <div class="container">
+        <header>
+            <h1>Krish Watch</h1>
+        </header>
+        
+        <nav>
+            <button class="nav-button active" data-tab="clock">Mine Clock</button>
+            <button class="nav-button" data-tab="stopwatch">Amar Stopwatch</button>
+            <button class="nav-button" data-tab="timer">My Timer</button>
+        </nav>
+        
+        <!-- Clock Tab Content -->
+        <div class="tab-content active" id="clockTab">
+            <div class="analog-clock">
+                <div class="clock-face">
+                    <div class="hour-marks"></div>
+                    <div class="minute-marks"></div>
+                    <div class="hour-numbers"></div>
+                    <div class="hour-hand hand"></div>
+                    <div class="minute-hand hand"></div>
+                    <div class="second-hand hand"></div>
+                    <div class="center-dot"></div>
+                </div>
+            </div>
+            
+            <div class="digital-clock">
+                <div class="time-display" id="digitalTime">00:00:00</div>
+                <div class="date-display" id="digitalDate">Monday, January 1, 2025</div>
+                
+                <div class="digital-sections">
+                    <div class="digital-section">
+                        <div class="section-label">Hours</div>
+                        <div class="section-value" id="hoursValue">00</div>
+                    </div>
+                    <div class="digital-section">
+                        <div class="section-label">Minutes</div>
+                        <div class="section-value" id="minutesValue">00</div>
+                    </div>
+                    <div class="digital-section">
+                        <div class="section-label">Seconds</div>
+                        <div class="section-value" id="secondsValue">00</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Stopwatch Tab Content -->
+        <div class="tab-content" id="stopwatchTab">
+            <div class="stopwatch">
+                <div class="stopwatch-display" id="stopwatchDisplay">
+                    00:00:00<span class="milliseconds">.000</span>
+                </div>
+                
+                <div class="controls">
+                    <button class="control-button start-button" id="startStopwatch">Start</button>
+                    <button class="control-button stop-button" id="stopStopwatch" disabled>Stop</button>
+                    <button class="control-button reset-button" id="resetStopwatch">Reset</button>
+                    <button class="control-button lap-button" id="lapStopwatch" disabled>Lap</button>
+                </div>
+                
+                <div class="laps" id="lapsContainer"></div>
+            </div>
+        </div>
+        
+        <!-- Timer Tab Content -->
+        <div class="tab-content" id="timerTab">
+            <div class="timer">
+                <div class="timer-display" id="timerDisplay">00:00:00</div>
+                
+                <div class="timer-inputs">
+                    <div class="timer-input-group">
+                        <div class="timer-input-label">Hours</div>
+                        <input type="number" class="timer-input" id="hoursInput" min="0" max="23" value="0">
+                    </div>
+                    <div class="timer-input-group">
+                        <div class="timer-input-label">Minutes</div>
+                        <input type="number" class="timer-input" id="minutesInput" min="0" max="59" value="0">
+                    </div>
+                    <div class="timer-input-group">
+                        <div class="timer-input-label">Seconds</div>
+                        <input type="number" class="timer-input" id="secondsInput" min="0" max="59" value="0">
+                    </div>
+                </div>
+                
+                <div class="controls">
+                    <button class="control-button start-button" id="startTimer">Start</button>
+                    <button class="control-button stop-button" id="stopTimer" disabled>Stop</button>
+                    <button class="control-button reset-button" id="resetTimer">Reset</button>
+                </div>
+                
+                <div class="timer-progress">
+                    <div class="progress-bar" id="timerProgressBar"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="claudeClock.js">
+    </script>
+    
+
+</body>
+</html>
+                

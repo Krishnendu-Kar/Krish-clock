@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatGpt Clock</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+            background-color: #282c34;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+
+        .clock-container {
+            text-align: center;
+        }
+
+        .clock {
+            width: 280px;
+            height: 280px;
+            background: white;
+            border-radius: 50%;
+            border: 10px solid black;
+            position: relative;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .hand {
+            position: absolute;
+            bottom: 50%;
+            left: 50%;
+            transform-origin: bottom;
+            transform: translateX(-50%) rotate(0deg);
+            border-radius: 5px;
+            transition: transform 0.5s ease-in-out;
+        }
+
+        .hour-hand {
+            width: 8px;
+            height: 70px;
+            background: black;
+        }
+
+        .minute-hand {
+            width: 5px;
+            height: 90px;
+            background: black;
+        }
+
+        .second-hand {
+            width: 3px;
+            height: 100px;
+            background: red;
+        }
+
+        .center-dot {
+            width: 12px;
+            height: 12px;
+            background: black;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 2;
+        }
+
+        /* Hour Numbers */
+        .hour-number {
+            position: absolute;
+            font-size: 18px;
+            font-weight: bold;
+            color: black;
+            text-align: center;
+            width: 25px;
+            height: 25px;
+            line-height: 25px;
+            transition: color 0.5s, text-shadow 0.5s;
+        }
+
+        /* Minute & Second Numbers */
+        .minute-number {
+            position: absolute;
+            font-size: 10px;
+            font-weight: bold;
+            color: gray;
+            text-align: center;
+            width: 20px;
+            height: 20px;
+            line-height: 20px;
+            transition: color 0.5s, text-shadow 0.5s;
+        }
+
+        /* Glow Effect */
+        .glow {
+            color: red !important;
+            text-shadow: 0 0 10px red, 0 0 20px red;
+        }
+
+        /* Digital Clock */
+        .digital-clock {
+            margin-top: 20px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+    
+            .digital-clock, .stopwatch, .timer-display {
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .buttons {
+            margin-top: 10px;
+        }
+
+        button {
+            font-size: 16px;
+            margin: 5px;
+            padding: 8px 15px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+        }
+
+        .start { background-color: green; color: white; }
+        .stop { background-color: red; color: white; }
+        .reset { background-color: blue; color: white; }
+
+        /* Timer Input */
+        .timer-input {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .timer-input input {
+            width: 50px;
+            font-size: 18px;
+            text-align: center;
+        }
+
+        /* Timer Alert */
+        .alert {
+            color: red;
+            font-size: 20px;
+            font-weight: bold;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="clock-container">
+        <div class="clock">
+            <div class="hand hour-hand"></div>
+            <div class="hand minute-hand"></div>
+            <div class="hand second-hand"></div>
+            <div class="center-dot"></div>
+        </div>
+        <div class="digital-clock" id="digital-clock">00:00:00.000 AM</div>
+    </div>
+    <div class="stopwatch" id="stopwatch">00:00:00.000</div>
+    <div class="buttons">
+        <button class="start" onclick="startStopwatch()">Start</button>
+        <button class="stop" onclick="stopStopwatch()">Stop</button>
+        <button class="reset" onclick="resetStopwatch()">Reset</button>
+    </div>
+
+    <!-- Timer -->
+    <div class="timer-container">
+        <div class="timer-input">
+            <input type="number" id="timer-hours" placeholder="HH" min="0">
+            <input type="number" id="timer-minutes" placeholder="MM" min="0" max="59">
+            <input type="number" id="timer-seconds" placeholder="SS" min="0" max="59">
+        </div>
+        <div class="buttons">
+            <button class="start" onclick="startTimer()">Start</button>
+            <button class="stop" onclick="pauseTimer()">Pause</button>
+            <button class="reset" onclick="resetTimer()">Reset</button>
+        </div>
+        <div class="timer-display" id="timer-display">00:00:00</div>
+        <div class="alert" id="timer-alert">Time's Up!</div>
+    </div>
+
+
+    <script>
+        const clock = document.querySelector(".clock");
+
+        // Create hour numbers (1-12)
+        let hourNumbers = {};
+        for (let i = 1; i <= 12; i++) {
+            let num = document.createElement("div");
+            num.className = "hour-number";
+            let angle = (i * 30) - 90;
+            let x = Math.cos(angle * (Math.PI / 180)) * 105 + 130;
+            let y = Math.sin(angle * (Math.PI / 180)) * 105 + 130;
+            num.style.left = `${x}px`;
+            num.style.top = `${y}px`;
+            num.textContent = i;
+            clock.appendChild(num);
+            hourNumbers[i] = num;
+        }
+
+        // Create minute and second numbers (5-60)
+        let minuteNumbers = {};
+        for (let i = 5; i <= 60; i += 5) {
+            let num = document.createElement("div");
+            num.className = "minute-number";
+            let angle = (i * 6) - 90;
+            let x = Math.cos(angle * (Math.PI / 180)) * 85 + 130;
+            let y = Math.sin(angle * (Math.PI / 180)) * 85 + 130;
+            num.style.left = `${x}px`;
+            num.style.top = `${y}px`;
+            num.textContent = i;
+            clock.appendChild(num);
+            minuteNumbers[i] = num;
+        }
+
+        function updateClock() {
+            const now = new Date();
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            const seconds = now.getSeconds();
+            const milliseconds = now.getMilliseconds(); // Added milliseconds
+
+            // Analog clock calculations
+            const hourDeg = (hours % 12) * 30 + (minutes * 0.5);
+            const minuteDeg = minutes * 6;
+            const secondDeg = seconds * 6;
+
+            document.querySelector('.hour-hand').style.transform = `translateX(-50%) rotate(${hourDeg}deg)`;
+            document.querySelector('.minute-hand').style.transform = `translateX(-50%) rotate(${minuteDeg}deg)`;
+            document.querySelector('.second-hand').style.transform = `translateX(-50%) rotate(${secondDeg}deg)`;
+
+            // Digital clock format (12-hour format with AM/PM)
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            const formattedHours = hours % 12 || 12;
+            const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
+            const formattedSeconds = seconds < 10 ? '0' + seconds : seconds;
+            const formattedMilliseconds = milliseconds.toString().padStart(3, '0'); // Format milliseconds
+
+            const digitalTime = `${formattedHours}:${formattedMinutes}:${formattedSeconds}.${formattedMilliseconds} ${ampm}`;
+            document.getElementById('digital-clock').textContent = digitalTime;
+
+            // Remove glow from all numbers
+            document.querySelectorAll(".hour-number, .minute-number").forEach(el => el.classList.remove("glow"));
+
+            // Apply glow effect to current hour, minute, and second
+            if (hourNumbers[formattedHours]) hourNumbers[formattedHours].classList.add("glow");
+            if (minuteNumbers[minutes]) minuteNumbers[minutes].classList.add("glow");
+            if (minuteNumbers[seconds]) minuteNumbers[seconds].classList.add("glow");
+        }
+
+        setInterval(updateClock, 10); // Update every 10ms for smooth milliseconds
+        updateClock();
+            
+                    // Stopwatch
+        let stopwatchTime = 0, running = false, stopwatchInterval;
+        function startStopwatch() {
+            if (!running) {
+                running = true;
+                let startTime = Date.now() - stopwatchTime;
+                stopwatchInterval = setInterval(() => {
+                    stopwatchTime = Date.now() - startTime;
+                    displayStopwatch();
+                }, 10);
+            }
+        }
+        function stopStopwatch() { running = false; clearInterval(stopwatchInterval); }
+        function resetStopwatch() { running = false; clearInterval(stopwatchInterval); stopwatchTime = 0; displayStopwatch(); }
+        function displayStopwatch() {
+            let ms = String(stopwatchTime % 1000).padStart(3, '0');
+            let s = String(Math.floor((stopwatchTime / 1000) % 60)).padStart(2, '0');
+            let m = String(Math.floor((stopwatchTime / (1000 * 60)) % 60)).padStart(2, '0');
+            let h = String(Math.floor(stopwatchTime / (1000 * 60 * 60))).padStart(2, '0');
+            document.getElementById('stopwatch').textContent = `${h}:${m}:${s}.${ms}`;
+        }
+
+        // Timer
+        let timerTime = 0, timerRunning = false, timerInterval, lastPausedTime = 0;
+
+        function startTimer() {
+            if (!timerRunning) {
+                timerRunning = true;
+                
+                if (timerTime === 0) {  // Set time only if it's not paused
+                    let hours = parseInt(document.getElementById('timer-hours').value) || 0;
+                    let minutes = parseInt(document.getElementById('timer-minutes').value) || 0;
+                    let seconds = parseInt(document.getElementById('timer-seconds').value) || 0;
+                    timerTime = (hours * 3600 + minutes * 60 + seconds) * 1000;
+                }
+
+                timerInterval = setInterval(() => {
+                    if (timerTime > 0) { 
+                        timerTime -= 1000; 
+                        displayTimer();
+                    } else { 
+                        clearInterval(timerInterval);
+                        document.getElementById('timer-alert').style.display = 'block';
+                        timerRunning = false;
+                    }
+                }, 1000);
+            }
+        }
+
+        function pauseTimer() {
+            timerRunning = false;
+            clearInterval(timerInterval);
+            lastPausedTime = timerTime;  // Save remaining time when paused
+        }
+
+        function resetTimer() {
+            timerRunning = false;
+            clearInterval(timerInterval);
+            timerTime = 0;
+            lastPausedTime = 0;
+            document.getElementById('timer-alert').style.display = 'none';
+            displayTimer();
+        }
+
+        function displayTimer() {
+            let s = String(Math.floor((timerTime / 1000) % 60)).padStart(2, '0');
+            let m = String(Math.floor((timerTime / (1000 * 60)) % 60)).padStart(2, '0');
+            let h = String(Math.floor(timerTime / (1000 * 60 * 60))).padStart(2, '0');
+            document.getElementById('timer-display').textContent = `${h}:${m}:${s}`;
+        }
+    </script>
+</body>
+</html>

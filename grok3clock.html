@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grok3 Clock</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: #f0f0f0;
+        }
+
+        .container {
+            margin: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        /* Analog Clock */
+        .analog-clock {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            border: 5px solid #333;
+            border-radius: 50%;
+            background: white;
+        }
+
+        .hand {
+            position: absolute;
+            bottom: 50%;
+            left: 50%;
+            transform-origin: bottom;
+            background: black;
+        }
+
+        .hour-hand { width: 4px; height: 50px; background: #333; }
+        .minute-hand { width: 3px; height: 70px; background: #666; }
+        .second-hand { width: 2px; height: 80px; background: #ff0000; }
+        .center { 
+            width: 8px; 
+            height: 8px; 
+            background: #333; 
+            border-radius: 50%; 
+            position: absolute; 
+            top: 50%; 
+            left: 50%; 
+            transform: translate(-50%, -50%); 
+        }
+
+        /* Digital Clock */
+        .digital-clock {
+            font-size: 2em;
+            padding: 20px;
+            background: #333;
+            color: white;
+            border-radius: 10px;
+        }
+
+        /* Stopwatch & Timer */
+        .stopwatch, .timer {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .display {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        button {
+            padding: 5px 10px;
+            margin: 0 5px;
+            cursor: pointer;
+        }
+
+        .timer input {
+            width: 50px;
+            margin: 0 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Analog Clock -->
+        <div class="analog-clock">
+            <div class="hand hour-hand"></div>
+            <div class="hand minute-hand"></div>
+            <div class="hand second-hand"></div>
+            <div class="center"></div>
+        </div>
+
+        <!-- Digital Clock -->
+        <div class="digital-clock" id="digitalClock">00:00:00</div>
+
+        <!-- Stopwatch -->
+        <div class="stopwatch">
+            <div class="display" id="stopwatchDisplay">00:00:00</div>
+            <button onclick="startStopwatch()">Start</button>
+            <button onclick="stopStopwatch()">Stop</button>
+            <button onclick="resetStopwatch()">Reset</button>
+        </div>
+
+        <!-- Timer -->
+        <div class="timer">
+            <div class="display" id="timerDisplay">00:00:00</div>
+            <div>
+                <input type="number" id="hours" min="0" placeholder="HH">
+                <input type="number" id="minutes" min="0" max="59" placeholder="MM">
+                <input type="number" id="seconds" min="0" max="59" placeholder="SS">
+            </div>
+            <button onclick="startTimer()">Start</button>
+            <button onclick="stopTimer()">Stop</button>
+            <button onclick="resetTimer()">Reset</button>
+        </div>
+    </div>
+
+    <script>
+        // Analog Clock
+        function updateAnalogClock() {
+            const now = new Date();
+            const seconds = now.getSeconds();
+            const minutes = now.getMinutes();
+            const hours = now.getHours();
+            
+            const secondHand = document.querySelector('.second-hand');
+            const minuteHand = document.querySelector('.minute-hand');
+            const hourHand = document.querySelector('.hour-hand');
+
+            const secondsDegrees = ((seconds / 60) * 360) + 90;
+            const minutesDegrees = ((minutes / 60) * 360) + ((seconds/60)*6) + 90;
+            const hoursDegrees = ((hours / 12) * 360) + ((minutes/60)*30) + 90;
+
+            secondHand.style.transform = `rotate(${secondsDegrees}deg)`;
+            minuteHand.style.transform = `rotate(${minutesDegrees}deg)`;
+            hourHand.style.transform = `rotate(${hoursDegrees}deg)`;
+        }
+
+        // Digital Clock
+        function updateDigitalClock() {
+            const now = new Date();
+            const time = now.toLocaleTimeString();
+            document.getElementById('digitalClock').textContent = time;
+        }
+
+        // Stopwatch
+        let stopwatchInterval;
+        let stopwatchTime = 0;
+        function startStopwatch() {
+            clearInterval(stopwatchInterval);
+            stopwatchInterval = setInterval(() => {
+                stopwatchTime++;
+                updateStopwatchDisplay();
+            }, 1000);
+        }
+        function stopStopwatch() {
+            clearInterval(stopwatchInterval);
+        }
+        function resetStopwatch() {
+            clearInterval(stopwatchInterval);
+            stopwatchTime = 0;
+            updateStopwatchDisplay();
+        }
+        function updateStopwatchDisplay() {
+            const hours = Math.floor(stopwatchTime / 3600);
+            const minutes = Math.floor((stopwatchTime % 3600) / 60);
+            const seconds = stopwatchTime % 60;
+            document.getElementById('stopwatchDisplay').textContent = 
+                `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        // Timer
+        let timerInterval;
+        let timerTime = 0;
+        function startTimer() {
+            clearInterval(timerInterval);
+            const hours = parseInt(document.getElementById('hours').value) || 0;
+            const minutes = parseInt(document.getElementById('minutes').value) || 0;
+            const seconds = parseInt(document.getElementById('seconds').value) || 0;
+            timerTime = (hours * 3600) + (minutes * 60) + seconds;
+            
+            if (timerTime > 0) {
+                timerInterval = setInterval(() => {
+                    if (timerTime > 0) {
+                        timerTime--;
+                        updateTimerDisplay();
+                    } else {
+                        clearInterval(timerInterval);
+                        alert('Timer finished!');
+                    }
+                }, 1000);
+            }
+        }
+        function stopTimer() {
+            clearInterval(timerInterval);
+        }
+        function resetTimer() {
+            clearInterval(timerInterval);
+            timerTime = 0;
+            document.getElementById('hours').value = '';
+            document.getElementById('minutes').value = '';
+            document.getElementById('seconds').value = '';
+            updateTimerDisplay();
+        }
+        function updateTimerDisplay() {
+            const hours = Math.floor(timerTime / 3600);
+            const minutes = Math.floor((timerTime % 3600) / 60);
+            const seconds = timerTime % 60;
+            document.getElementById('timerDisplay').textContent = 
+                `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        // Initial setup and intervals
+        updateAnalogClock();
+        updateDigitalClock();
+        setInterval(updateAnalogClock, 1000);
+        setInterval(updateDigitalClock, 1000);
+    </script>
+</body>
+</html>
